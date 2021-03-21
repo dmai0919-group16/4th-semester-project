@@ -1,6 +1,7 @@
-*/.idea/
 .idea/
 venv/
 .vscode/
+__pycache__
+spotify_cache
 
 apiKeys.json

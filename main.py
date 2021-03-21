@@ -1,6 +1,12 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
-import threading
+import os
+import json
+import webbrowser
+import spotipy
+import spotify_export.spotify_helper as spotify_helper
 
+cache_file = 'spotify_cache'
+creds_file = 'apiKeys.json'
 server_host = 'localhost'
 server_port = 8081 
 
@@ -28,10 +34,52 @@ class DummyRequestHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == '__main__':
-    print('[*] Starting web server (on %s:%i) to catch login redirect' % (server_host, server_port))
+    client_id, client_secret = None, None
+
+    ######################################
+    # Read Spotify client keys from json #
+    ######################################
+    if os.path.exists(creds_file):
+        with open(creds_file) as json_file:
+            data = json.load(json_file)
+            client_id, client_secret = data['clientId'], data['clientSecret']
+    else:
+        print('[!] API key file \'%s\' doesn\'t exist. Aborting...' % creds_file)
+        exit(-1)
+
+    ####################################################
+    # Authenticate user to our Spotify cient via OAuth #
+    ####################################################
+
+    # Cache file belongs to a single user. Multiple users call for another caching solution
+    cache_handler = spotipy.cache_handler.CacheFileHandler(cache_file) 
+    oauth_object = spotify_helper.get_spotify_oauth(
+        scope='playlist-modify-public',
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri='http://%s:%i' % (server_host, server_port),
+        cache_handler=cache_handler
+    )
+
+    auth_url = spotify_helper.authenticate_user_get_url(oauth_object)
+    print('[*] Opening user authentication URL \'%s\'...' % auth_url)
+    webbrowser.open(auth_url)
+
+    ################################################################
+    # Start dummy web-server to catch redirect URL with auth token #
+    ################################################################
+    print('[*] Starting web server (on %s:%i)' % (server_host, server_port))
     httpd = StoppableHttpServer((server_host, server_port), DummyRequestHandler)
     httpd.serve_forever()
     httpd.server_close()
 
-    print('[*] Caught URL with auth token %s', response_path)
-    
+    print('[*] Caught URL with auth token \'%s\'', response_path)
+
+    print(spotify_helper.authenticate_user_get_token(oauth_object, response_path))
+
+    # Clean-up
+    if os.path.exists(cache_file):
+        print('[*] Removing cache file \'%s\'' % cache_file)
+        os.remove(cache_file)
+
+
