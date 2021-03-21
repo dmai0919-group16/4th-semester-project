@@ -5,4 +5,5 @@ def add_songs_to_playlist(csv_filename, auth_token):
     """ """
     pass
 
-def add_songs_to_new_playlist(csv_filename)
+def add_songs_to_new_playlist(csv_filename):
+    pass

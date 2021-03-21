@@ -73,7 +73,7 @@ if __name__ == '__main__':
     httpd.serve_forever()
     httpd.server_close()
 
-    print('[*] Caught URL with auth token \'%s\'', response_path)
+    print('[*] Caught URL with auth token \'%s\'' % response_path)
 
     print(spotify_helper.authenticate_user_get_token(oauth_object, response_path))
 
