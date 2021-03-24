@@ -77,7 +77,11 @@ if __name__ == '__main__':
 
     print(spotify_helper.authenticate_user_get_token(oauth_object, response_path))
 
-    # Clean-up
+    
+
+    ############
+    # Clean-up #
+    ############
     if os.path.exists(cache_file):
         print('[*] Removing cache file \'%s\'' % cache_file)
         os.remove(cache_file)
