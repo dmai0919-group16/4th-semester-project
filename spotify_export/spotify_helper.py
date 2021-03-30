@@ -22,3 +22,6 @@ def authenticate_user_get_token(spotify_oauth, url):
         return token
     else:
         raise Exception("The URL is invalid or does not contain a valid response code.")
+
+def get_spotify_object(oauth_object):
+    return spotipy.Spotify(oauth_manager=oauth_object)

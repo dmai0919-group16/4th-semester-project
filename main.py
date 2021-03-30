@@ -4,11 +4,15 @@ import json
 import webbrowser
 import spotipy
 import spotify_export.spotify_helper as spotify_helper
+import spotify_export.spotify_export as export
+
+songs_file = 'New_Music_in_My_Danish_stations.csv'
 
 cache_file = 'spotify_cache'
 creds_file = 'apiKeys.json'
 server_host = 'localhost'
 server_port = 8081 
+
 
 response_path = None
 
@@ -75,9 +79,13 @@ if __name__ == '__main__':
 
     print('[*] Caught URL with auth token \'%s\'' % response_path)
 
-    print(spotify_helper.authenticate_user_get_token(oauth_object, response_path))
+    auth_token = spotify_helper.authenticate_user_get_token(oauth_object, response_path)
+    spotify_object = spotify_helper.get_spotify_object(oauth_object)
 
+    print(auth_token)
+    print(spotify_object.current_user())
     
+    export.add_songs_to_new_playlist(songs_file, oauth_object, 'lofasz')
 
     ############
     # Clean-up #
@@ -85,5 +93,4 @@ if __name__ == '__main__':
     if os.path.exists(cache_file):
         print('[*] Removing cache file \'%s\'' % cache_file)
         os.remove(cache_file)
-
 
