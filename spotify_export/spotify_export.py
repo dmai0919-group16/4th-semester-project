@@ -13,13 +13,23 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
 
         for line in reader:
             song_input = line['Title']
-            song_artist = line['Artist']
+            song_artist = ''
+            featuring_artist = ''
+
+            if ' feat.' in line['Artist']:
+                song_artist_raw = line['Artist']
+                song_artist = song_artist_raw[0:song_artist_raw.lower().find(' feat.')]
+                featuring_artist = song_artist_raw[song_artist_raw.find(' feat.')+7:-1]
+            else: song_artist = line['Artist']
+
             found = False
+            # print(song_input)
+            # print(song_artist)
 
             result = spotify_object.search(q=song_input, limit=max_results_per_song)
 
             for item in result['tracks']['items']:
-                if item['artists'][0]['name'] == song_artist:
+                if item['artists'][0]['name'].lower() == song_artist.lower():
                     list_of_songs.append(item['uri'])
                     found = True
                 if found:
@@ -28,7 +38,7 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
             if found == False:
                 result = spotify_object.search(q=song_input + ' ' + song_artist, limit=max_results_per_song)
                 for item in result['tracks']['items']:
-                    if item['artists'][0]['name'] == song_artist:
+                    if item['artists'][0]['name'].lower() == song_artist.lower():
                         list_of_songs.append(
                             item['uri'])
                         found = True

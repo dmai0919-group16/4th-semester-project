@@ -85,7 +85,7 @@ if __name__ == '__main__':
     print(auth_token)
     print(spotify_object.current_user())
     
-    export.add_songs_to_new_playlist(songs_file, oauth_object, 'lofasz')
+    export.add_songs_to_new_playlist(songs_file, oauth_object, songs_file)
 
     ############
     # Clean-up #
