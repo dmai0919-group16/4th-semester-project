@@ -6,7 +6,7 @@ import spotipy
 import spotify_export.spotify_helper as spotify_helper
 import spotify_export.spotify_export as export
 
-songs_file = 'New_Music_in_My_Danish_stations.csv'
+songs_file = 'Station Chart másolata.csv'
 
 cache_file = 'spotify_cache'
 creds_file = 'apiKeys.json'

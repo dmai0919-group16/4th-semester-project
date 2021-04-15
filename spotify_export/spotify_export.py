@@ -1,5 +1,5 @@
 import csv
-
+import Levenshtein
 import spotify_export.spotify_helper as spotify_helper
 
 
@@ -12,38 +12,60 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
         reader = csv.DictReader(f)
 
         for line in reader:
-            song_input = line['Title']
-            song_artist = ''
-            featuring_artist = ''
+            if line['Title'] is not None:
 
-            if ' feat.' in line['Artist']:
-                song_artist_raw = line['Artist']
-                song_artist = song_artist_raw[0:song_artist_raw.lower().find(' feat.')]
-                featuring_artist = song_artist_raw[song_artist_raw.find(' feat.')+7:-1]
-            else: song_artist = line['Artist']
+                song_title = line['Title']
+                song_artist = ''
+                featuring_artist = ''
 
-            found = False
-            # print(song_input)
-            # print(song_artist)
+                #####################################################
+                # Clear the artist input from the featuring artists #
+                #####################################################
+                if ' feat.' in line['Artist']:
+                    song_artist_raw = line['Artist']
+                    song_artist = song_artist_raw[0:song_artist_raw.lower().find('feat.')]
+                    featuring_artist = song_artist_raw[song_artist_raw.find(' feat.')+7:-1]
+                else: song_artist = line['Artist']
 
-            result = spotify_object.search(q=song_input, limit=max_results_per_song)
+                found = False
+                print(song_title)
+                print(song_artist)
 
-            for item in result['tracks']['items']:
-                if item['artists'][0]['name'].lower() == song_artist.lower():
-                    list_of_songs.append(item['uri'])
-                    found = True
-                if found:
-                    break
+                result = spotify_object.search(q=song_title, limit=max_results_per_song)
 
-            if found == False:
-                result = spotify_object.search(q=song_input + ' ' + song_artist, limit=max_results_per_song)
+                #####################################################
+                # Search for the song with different configurations #
+                #####################################################
                 for item in result['tracks']['items']:
-                    if item['artists'][0]['name'].lower() == song_artist.lower():
-                        list_of_songs.append(
-                            item['uri'])
+                    print(item['artists'][0]['name'])
+                    print(song_artist.lower())
+                    if Levenshtein.distance(item['artists'][0]['name'].lower(),song_artist.lower())<=4:
+                        list_of_songs.append(item['uri'])
                         found = True
                     if found:
                         break
+
+                if found == False:
+                    result = spotify_object.search(q=song_title + ' ' + song_artist, limit=max_results_per_song)
+                    for item in result['tracks']['items']:
+                        print(item['artists'][0]['name'])
+                        print(song_artist.lower())
+                        if Levenshtein.distance(item['artists'][0]['name'].lower(),song_artist.lower())<=5:
+                            list_of_songs.append(item['uri'])
+                            found = True
+                        if found:
+                            break
+
+                if found == False:
+                    result = spotify_object.search(q=song_artist + ' ' + song_title, limit=max_results_per_song)
+                    for item in result['tracks']['items']:
+                        print(item['artists'][0]['name'])
+                        print(song_artist.lower())
+                        if Levenshtein.distance(item['artists'][0]['name'].lower(),song_artist.lower())<=8:
+                            list_of_songs.append(item['uri'])
+                            found = True
+                        if found:
+                            break
 
     user_id = spotify_object.me()['id']
 
