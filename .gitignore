@@ -5,3 +5,5 @@ __pycache__
 spotify_cache
 
 apiKeys.json
+.vscode/
+.github/
