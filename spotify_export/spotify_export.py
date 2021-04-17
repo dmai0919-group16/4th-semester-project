@@ -25,6 +25,12 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
                     song_artist_raw = line['Artist']
                     song_artist = song_artist_raw[0:song_artist_raw.lower().find('feat.')]
                     featuring_artist = song_artist_raw[song_artist_raw.find(' feat.')+7:-1]
+                elif ' X ' in line['Artist']:
+                    song_artist_raw = line['Artist']
+                    song_artist = song_artist_raw[0:song_artist_raw.lower().find(' x ')]
+                    featuring_artist_raw = song_artist_raw[song_artist_raw.find(' X ') +3:-1]
+                    if ' X ' in featuring_artist_raw:
+                        featuring_artist = featuring_artist_raw[ 0 : featuring_artist_raw.find(' X ')]
                 else: song_artist = line['Artist']
 
                 found = False
@@ -66,6 +72,7 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
                             found = True
                         if found:
                             break
+
 
     user_id = spotify_object.me()['id']
 
