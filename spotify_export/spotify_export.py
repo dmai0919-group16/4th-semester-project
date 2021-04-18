@@ -31,6 +31,18 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
                     featuring_artist_raw = song_artist_raw[song_artist_raw.find(' X ') +3:-1]
                     if ' X ' in featuring_artist_raw:
                         featuring_artist = featuring_artist_raw[ 0 : featuring_artist_raw.find(' X ')]
+                elif ' & ' in line['Artist']:
+                    song_artist_raw = line['Artist']
+                    song_artist = song_artist_raw[0:song_artist_raw.lower().find(' & ')]
+                    featuring_artist_raw = song_artist_raw[song_artist_raw.find(' & ') +3:-1]
+                    if ' & ' in featuring_artist_raw:
+                        featuring_artist = featuring_artist_raw[ 0 : featuring_artist_raw.find(' & ')]
+                elif ' / ' in line['Artist']:
+                    song_artist_raw = line['Artist']
+                    song_artist = song_artist_raw[0:song_artist_raw.lower().find(' / ')]
+                    featuring_artist_raw = song_artist_raw[song_artist_raw.find(' / ') +3:-1]
+                    if ' / ' in featuring_artist_raw:
+                        featuring_artist = featuring_artist_raw[ 0 : featuring_artist_raw.find(' / ')]
                 else: song_artist = line['Artist']
 
                 found = False
