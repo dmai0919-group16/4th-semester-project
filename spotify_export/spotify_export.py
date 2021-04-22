@@ -12,67 +12,66 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
         reader = csv.DictReader(f)
 
         for line in reader:
-            if line['Title'] is not None:
+            song_title = line['Title']
+            song_artist = ''
+            featuring_artist = ''
 
-                song_title = line['Title']
-                song_artist = ''
-                featuring_artist = ''
+            #####################################################
+            # Clear the artist input from the featuring artists #
+            #####################################################
+            song_artist_raw = line['Artist']
+            feat_number = song_artist_raw.find(' feat. ')
+            and_number = song_artist_raw.find(' & ')
+            slash_number = song_artist_raw.find(' / ')
+            x_number = song_artist_raw.lower().find(' x ')
+            safety_number = 1000
+            separation_list = [feat_number, and_number, slash_number, x_number, safety_number]
+            method_number = separation_list.index(min(i for i in separation_list if i > 0))
+            if method_number < 4:
+                song_artist, featuring_artist = separation_method_switcher(method_number, song_artist_raw,
+                                                                           featuring_artist)
+            else:
+                song_artist = separation_method_switcher(method_number, song_artist_raw, featuring_artist)
 
-                #####################################################
-                # Clear the artist input from the featuring artists #
-                #####################################################
-                song_artist_raw = line['Artist']
-                feat_number = song_artist_raw.find(' feat. ')
-                and_number = song_artist_raw.find(' & ')
-                slash_number = song_artist_raw.find(' / ')
-                x_number = song_artist_raw.find(' X ')
-                safety_number = 1000
-                separation_list = [feat_number, and_number, slash_number, x_number, safety_number]
-                method_number = separation_list.index(min(i for i in separation_list if i > 0))
-                if method_number < 4:
-                    song_artist, featuring_artist = separation_method_switcher(method_number, song_artist_raw, featuring_artist)
-                else:
-                    song_artist = separation_method_switcher(method_number, song_artist_raw, featuring_artist)
+            found = False
+            print(song_title)
+            print(song_artist)
 
-                found = False
-                print(song_title)
-                print(song_artist)
+            result = spotify_object.search(q=song_title, limit=max_results_per_song)
 
-                result = spotify_object.search(q=song_title, limit=max_results_per_song)
+            #####################################################
+            # Search for the song with different configurations #
+            #####################################################
+            for item in result['tracks']['items']:
+                print(item['artists'][0]['name'])
+                print(song_artist.lower())
+                if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 3:
+                    list_of_songs.append(item['uri'])
+                    found = True
+                if found:
+                    break
 
-                #####################################################
-                # Search for the song with different configurations #
-                #####################################################
+            if found == False:
+                result = spotify_object.search(q=song_title + ' ' + song_artist, limit=max_results_per_song)
                 for item in result['tracks']['items']:
                     print(item['artists'][0]['name'])
                     print(song_artist.lower())
-                    if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 4:
+                    if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 5:
                         list_of_songs.append(item['uri'])
                         found = True
                     if found:
                         break
 
-                if found == False:
-                    result = spotify_object.search(q=song_title + ' ' + song_artist, limit=max_results_per_song)
-                    for item in result['tracks']['items']:
-                        print(item['artists'][0]['name'])
-                        print(song_artist.lower())
-                        if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 5:
-                            list_of_songs.append(item['uri'])
-                            found = True
-                        if found:
-                            break
-
-                if found == False:
-                    result = spotify_object.search(q=song_artist + ' ' + song_title, limit=max_results_per_song)
-                    for item in result['tracks']['items']:
-                        print(item['artists'][0]['name'])
-                        print(song_artist.lower())
-                        if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 8:
-                            list_of_songs.append(item['uri'])
-                            found = True
-                        if found:
-                            break
+            if found == False:
+                result = spotify_object.search(q=song_artist + ' ' + song_title, limit=max_results_per_song)
+                for item in result['tracks']['items']:
+                    print(item['artists'][0]['name'])
+                    print(song_artist.lower())
+                    if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 7:
+                        list_of_songs.append(item['uri'])
+                        found = True
+                    if found:
+                        break
 
     user_id = spotify_object.me()['id']
 
