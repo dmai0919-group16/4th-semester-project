@@ -34,8 +34,6 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
                 song_artist = separation_method_switcher(method_number, song_artist_raw, featuring_artist)
 
             found = False
-            print(song_title)
-            print(song_artist)
 
             result = spotify_object.search(q=song_title, limit=max_results_per_song)
 
@@ -43,8 +41,6 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
             # Search for the song with different configurations #
             #####################################################
             for item in result['tracks']['items']:
-                print(item['artists'][0]['name'])
-                print(song_artist.lower())
                 if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 3:
                     list_of_songs.append(item['uri'])
                     found = True
@@ -54,8 +50,6 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
             if found == False:
                 result = spotify_object.search(q=song_title + ' ' + song_artist, limit=max_results_per_song)
                 for item in result['tracks']['items']:
-                    print(item['artists'][0]['name'])
-                    print(song_artist.lower())
                     if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 5:
                         list_of_songs.append(item['uri'])
                         found = True
@@ -65,8 +59,6 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
             if found == False:
                 result = spotify_object.search(q=song_artist + ' ' + song_title, limit=max_results_per_song)
                 for item in result['tracks']['items']:
-                    print(item['artists'][0]['name'])
-                    print(song_artist.lower())
                     if Levenshtein.distance(item['artists'][0]['name'].lower(), song_artist.lower()) <= 7:
                         list_of_songs.append(item['uri'])
                         found = True
@@ -74,8 +66,6 @@ def add_songs_to_playlist(csv_filename, oauth_object, playlist_id, max_results_p
                         break
 
     user_id = spotify_object.me()['id']
-
-    print(user_id, playlist_id, list_of_songs)
 
     spotify_object.user_playlist_add_tracks(user=user_id, playlist_id=playlist_id, tracks=list_of_songs)
 
